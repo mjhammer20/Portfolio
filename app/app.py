@@ -6,7 +6,7 @@ import tempfile
 # Initialize RDKit Module
 essential_methods = rdkit_essentials()
 
-# Define UI
+# Define UI Layout
 app_ui = ui.page_fluid(
     ui.input_text("smiles", "Enter a SMILES string to add to list:"),
     ui.input_action_button("add_smiles", "Add SMILES"),
@@ -16,22 +16,18 @@ app_ui = ui.page_fluid(
 )
 
 # Define Server Logic
-def server(input, output, session):
-    
+def server(input, output, session):  
     # Initialize a reactive value to store list of SMILES strings
     smiles_list = reactive.Value([])
 
     @reactive.effect
     @reactive.event(input.add_smiles)
     def _():
-        
         if input.add_smiles():
-            
             # Fetch smiles string from input
             smiles = input.smiles()
             
             if smiles:
-
                 # Add the new SMILES to the list
                 updated_list = smiles_list.get() + [smiles]
                 
@@ -44,16 +40,26 @@ def server(input, output, session):
     @output
     @render.text
     def output_smiles_list():
+        
+        # Fetch SMILES list stored in reactive value
         lst = smiles_list.get()
+        
+        # If the list is empty, return a message
         if not lst:
-            return "No SMILES strings added yet."
-        return "Current SMILES list: " + ", ".join(lst)
+            return "No SMILES strings added yet." 
+        
+        # Else, return joined list as string for display
+        return "Current SMILES list: " + ", ".join(lst) 
     
     @output
     @render.image
     @reactive.event(input.visualize_molecules)
     def output_mol_structures():
+        
+        # Fetch SMILES list stored in reactive value
         lst = smiles_list.get()
+        
+        # If list is empty, return None
         if not lst:
             return None
         
@@ -63,8 +69,12 @@ def server(input, output, session):
         # Generate grid image of molecule structures
         img = essential_methods.visualize_molecules(lst)
 
+        # If there is no image, return None
         if img is None:
             return None
+        
+        # Store image in temporary file and return its path for rendering
+        # This is necessary because Shiny expects a file path for image output
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
             img.save(tmp.name)
             tmp.flush()
