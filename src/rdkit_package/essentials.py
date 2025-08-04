@@ -1,7 +1,6 @@
 # Imports
-import rdkit.Chem as Chem
-from rdkit import DataStructs
-from rdkit.Chem import AllChem
+from rdkit import Chem, DataStructs
+from rdkit.Chem import AllChem, Draw
 
 # Class Def
 
@@ -15,13 +14,11 @@ class rdkit_essentials():
     def mol_from_smiles(self, smiles):
         '''Generate RDKit Mol objects from SMILES strings.'''
         self.ms = [Chem.MolFromSmiles(smile) for smile in smiles]
-        return self.ms
     
     def generate_fingerprints(self):
         '''Generate fingerprints for the molecules.'''
         fpgen = AllChem.GetRDKitFPGenerator()
         self.fps = [fpgen.GetFingerprint(m) for m in self.ms]
-        return self.fps
     
     def calculate_similarity(self, index1, index2):
         '''Calculate Tanimoto similarity between two fingerprints.'''
@@ -39,5 +36,5 @@ class rdkit_essentials():
         
     def visualize_molecules(self, smiles):
         '''Visualize a molecule in grid.'''
-        return Chem.Draw.MolToGridImage(self.ms, molsPerRow=3, subImgSize=(200, 200), legends=[smiles[i] for i in range(len(self.ms))])
+        return Draw.MolsToGridImage(self.ms, molsPerRow=3, subImgSize=(200, 200), legends=[smiles[i] for i in range(len(self.ms))])
         

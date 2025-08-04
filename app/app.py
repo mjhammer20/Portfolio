@@ -1,6 +1,7 @@
 # Import Standard Libraries
 from rdkit_package.essentials import rdkit_essentials
 from shiny import App, ui, render, reactive
+import tempfile
 
 # Initialize RDKit Module
 essential_methods = rdkit_essentials()
@@ -9,7 +10,9 @@ essential_methods = rdkit_essentials()
 app_ui = ui.page_fluid(
     ui.input_text("smiles", "Enter a SMILES string to add to list:"),
     ui.input_action_button("add_smiles", "Add SMILES"),
+    ui.input_action_button("visualize_molecules", "Visualize Molecules"),
     ui.output_text("output_smiles_list"),
+    ui.output_image("output_mol_structures"),
 )
 
 # Define Server Logic
@@ -48,20 +51,30 @@ def server(input, output, session):
     
     @output
     @render.image
-    def output_cpd__structures():
+    @reactive.event(input.visualize_molecules)
+    def output_mol_structures():
         lst = smiles_list.get()
         if not lst:
             return None
         
         # Generate RDKit Mol objects from SMILES strings
-        mols = essential_methods.mol_from_smiles(lst)
-        
-        # Visualize the first molecule as an image
-        if mols:
-            return essential_methods.visualize_molecules(0)
-        else:
-            return None
+        essential_methods.mol_from_smiles(lst)
 
+        # Generate grid image of molecule structures
+        img = essential_methods.visualize_molecules(lst)
+
+        if img is None:
+            return None
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+            img.save(tmp.name)
+            tmp.flush()
+            return {
+                "src": tmp.name,
+                "alt": "Molecule Grid",
+                "width": img.width,
+                "height": img.height,
+                "type": "image/png"
+            }
 
 # Lauunch App
 app = App(app_ui, server)
