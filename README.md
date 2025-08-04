@@ -1,5 +1,5 @@
 # Description
-Personal portfolio including example application manipulating chemical structures using RDKit
+Personal portfolio including an example application for visualizing molecules from SMILES strings.
 
 # Requirements
 Docker

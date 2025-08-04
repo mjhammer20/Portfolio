@@ -1,7 +1,7 @@
 [project]
 name = "rdkit_package"
 version = "0.1.0"
-description = "Package containing src code for example application."
+description = "Package containing src code for RDKit application."
 dependencies = [
     "rdkit"
 ]
