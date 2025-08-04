@@ -1,16 +1,9 @@
 # Import Standard Libraries
-import sys
-import os
+from rdkit_package.essentials import rdkit_essentials
 from shiny.express import input, ui, render
 
-# Add src to system path to import custom modules
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
-
-# Import Custom Modules 
-from src.rdkit_module import rdkit_functions
-
 # Initialize RDKit Module
-rdkit_module = rdkit_functions()
+essential_methods = rdkit_essentials()
 
 # Define UI
 app_ui = ui.page_fluid(
@@ -29,5 +22,5 @@ def server(input, output, session):
         smiles = input.smiles()
         if smiles:
             smiles_list.append(smiles)
-            rdkit_module.mol_from_smiles(smiles_list)
+            essential_methods.mol_from_smiles(smiles_list)
             print(f"Added SMILES: {smiles}")

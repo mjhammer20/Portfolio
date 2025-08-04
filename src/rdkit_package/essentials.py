@@ -5,7 +5,7 @@ from rdkit.Chem import AllChem
 
 # Class Def
 
-class rdkit_functions():
+class rdkit_essentials():
     '''Class housing essential RDKit functions for basic cheminformatics tasks.'''
 
     def __init__(self):

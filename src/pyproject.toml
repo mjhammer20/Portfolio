@@ -1,0 +1,11 @@
+[project]
+name = "rdkit_package"
+version = "0.1.0"
+description = "Package containing src code for example application."
+dependencies = [
+    "rdkit"
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
