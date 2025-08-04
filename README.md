@@ -1,2 +1,2 @@
 # Portfolio
-Personal portfolio including example code
+Personal portfolio including example code.
