@@ -47,5 +47,5 @@ COPY . .
 # Expose the port that the application listens on.
 EXPOSE 8000
 
-# Run the application.
-CMD python app.py
+# Run the application
+CMD ["shiny", "run", "app.py", "--host=0.0.0.0", "--port=8000"]
