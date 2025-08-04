@@ -1,0 +1,46 @@
+# Imports
+import rdkit.Chem as Chem
+from rdkit import DataStructs
+from rdkit.Chem import AllChem
+
+# Class Def
+
+class rdkit_functions():
+    '''Class housing essential RDKit functions for basic cheminformatics tasks.'''
+
+    def __init__(self):
+        self.ms = []
+        self.fps = []
+
+    def mol_from_smiles(self, smiles):
+        '''Generate RDKit Mol objects from SMILES strings.'''
+        self.ms = [Chem.MolFromSmiles(smile) for smile in smiles]
+        return self.ms
+    
+    def generate_fingerprints(self):
+        '''Generate fingerprints for the molecules.'''
+        fpgen = AllChem.GetRDKitFPGenerator()
+        self.fps = [fpgen.GetFingerprint(m) for m in self.ms]
+        return self.fps
+    
+    def calculate_similarity(self, index1, index2):
+        '''Calculate Tanimoto similarity between two fingerprints.'''
+        if index1 < len(self.fps) and index2 < len(self.fps):
+            return DataStructs.TanimotoSimilarity(self.fps[index1], self.fps[index2])
+        else:
+            raise IndexError("Index out of range for fingerprints.")
+        
+    def substructure_search(self, index1, index2):
+        '''Check if one molecule contains a substructure of another.'''
+        if index1 < len(self.ms) and index2 < len(self.ms):
+            return self.ms[index1].HasSubstructMatch(self.ms[index2])
+        else:
+            raise IndexError("Index out of range for molecules.")
+        
+    def visualize_molecule(self, index):
+        '''Visualize a molecule by its index.'''
+        if index < len(self.ms):
+            return Chem.Draw.MolToImage(self.ms[index])
+        else:
+            raise IndexError("Index out of range for molecules.")
+        
