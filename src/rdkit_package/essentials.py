@@ -37,10 +37,7 @@ class rdkit_essentials():
         else:
             raise IndexError("Index out of range for molecules.")
         
-    def visualize_molecule(self, index):
-        '''Visualize a molecule by its index.'''
-        if index < len(self.ms):
-            return Chem.Draw.MolToImage(self.ms[index])
-        else:
-            raise IndexError("Index out of range for molecules.")
+    def visualize_molecules(self, smiles):
+        '''Visualize a molecule in grid.'''
+        return Chem.Draw.MolToGridImage(self.ms, molsPerRow=3, subImgSize=(200, 200), legends=[smiles[i] for i in range(len(self.ms))])
         
