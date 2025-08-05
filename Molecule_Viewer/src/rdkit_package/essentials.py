@@ -11,19 +11,27 @@ class rdkit_essentials():
     '''
 
     def __init__(self):
+        self.smiles = []
         self.ms = []
         self.fps = []
 
-    def mol_from_smiles(self, smiles):
+    def import_smiles(self, smiles: str) -> list[str]:
         '''
-        Generate RDKit Mol objects from SMILES strings.
+        Check SMILES for valid format. If valid, add to list and convert to RDKit Mol object.
+        If invalid, raise ValueError.
         
-        :input smiles: List of SMILES strings.
+        :input smiles: SMILES string.
         :type smiles: list[str]
 
         '''
+        ms = Chem.MolFromSmiles(smiles)
 
-        self.ms = [Chem.MolFromSmiles(smile) for smile in smiles]
+        if not ms:
+            raise ValueError("Invalid SMILES string provided.")
+        self.smiles.append(smiles)
+        self.ms.append(ms)
+
+        return self.smiles
     
     def generate_fingerprints(self):
         '''

@@ -1,6 +1,8 @@
 # Import Standard Libraries
 from rdkit_package.essentials import rdkit_essentials
 from shiny import App, ui, render, reactive
+from rdkit import Chem, DataStructs
+from rdkit.Chem import AllChem, Draw
 import tempfile
 
 # Initialize RDKit Module
@@ -26,13 +28,22 @@ def server(input, output, session):
         if input.add_smiles():
             # Fetch smiles string from input
             smiles = input.smiles()
-            
+
             if smiles:
-                # Add the new SMILES to the list
-                updated_list = smiles_list.get() + [smiles]
-                
-                # Update reactive value to ensure output reflects the change
-                smiles_list.set(updated_list)
+                # Validate and import SMILES string using RDKit
+                try: 
+                    validated_smiles = essential_methods.import_smiles(smiles)
+                    smiles_list.set(validated_smiles)
+                except ValueError as e:
+                    # If invalid, show error message
+                    session.show_modal(
+                        ui.modal(
+                            f'Error: {str(e)}',
+                            title="Invalid SMILES",
+                            easy_close=True,
+                            footer=ui.modal_button("Close")
+                        )
+                    )
 
                 # Reset the input field to accept new SMILES
                 session.send_input_message("smiles", {"value": ""})
