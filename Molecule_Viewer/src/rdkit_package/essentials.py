@@ -77,7 +77,7 @@ class rdkit_essentials():
         else:
             raise IndexError("Index out of range for molecules.")
         
-    def visualize_molecules(self, smiles):
+    def visualize_molecules(self):
         '''
         Generate image to visualize molecules in a grid.
         
@@ -87,5 +87,5 @@ class rdkit_essentials():
         :rtype: PIL.Image or None
 
         '''
-        return Draw.MolsToGridImage(self.ms, molsPerRow=3, subImgSize=(200, 200), legends=[smiles[i] for i in range(len(self.ms))])
+        return Draw.MolsToGridImage(self.ms, molsPerRow=3, subImgSize=(200, 200), legends=[self.smiles[i] for i in range(len(self.ms))])
         

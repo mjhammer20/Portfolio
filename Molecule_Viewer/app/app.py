@@ -1,15 +1,11 @@
 # Import Standard Libraries
 from rdkit_package.essentials import rdkit_essentials
 from shiny import App, ui, render, reactive
-from rdkit import Chem, DataStructs
-from rdkit.Chem import AllChem, Draw
 import tempfile
-
-# Initialize RDKit Module
-essential_methods = rdkit_essentials()
 
 # Define UI Layout
 app_ui = ui.page_fluid(
+    ui.tags.script("Shiny.setInputValue('page_loaded', True);"),
     ui.input_text("smiles", "Enter a SMILES string to add to list:"),
     ui.input_action_button("add_smiles", "Add SMILES"),
     ui.input_action_button("visualize_molecules", "Visualize Molecules"),
@@ -19,8 +15,22 @@ app_ui = ui.page_fluid(
 
 # Define Server Logic
 def server(input, output, session):  
+    
+    # Initialize RDKit Module
+    essential_methods = rdkit_essentials()
+
     # Initialize a reactive value to store list of SMILES strings
     smiles_list = reactive.Value([])
+
+    @reactive.effect
+    @reactive.event(input.page_loaded)
+    def _():
+
+        # Reset stored values when the page is loaded
+        if input.page_loaded():
+            essential_methods.smiles = []
+            essential_methods.ms = []
+            essential_methods.fps = []
 
     @reactive.effect
     @reactive.event(input.add_smiles)
@@ -30,13 +40,15 @@ def server(input, output, session):
             smiles = input.smiles()
 
             if smiles:
-                # Validate and import SMILES string using RDKit
+                # Validate and import SMILES string using RDKit and update the list
                 try:
-                    validated_smiles = essential_methods.import_smiles(smiles)
-                    smiles_list.set(validated_smiles)
+                    essential_methods.import_smiles(smiles)
+                    updated_smiles_list = smiles_list.get() + [smiles]
+                    smiles_list.set(updated_smiles_list)
+
+                # If invalid, show error message
                 except ValueError as e:
-                    # If invalid, show error message
-                    session.show_modal(
+                    ui.modal_show(
                         ui.modal(
                             f'Error: {str(e)}',
                             title="Invalid SMILES",
@@ -67,23 +79,21 @@ def server(input, output, session):
     @reactive.event(input.visualize_molecules)
     def output_mol_structures():
         
-        # Fetch SMILES list stored in reactive value
-        lst = smiles_list.get()
-        
-        # If list is empty, return None
-        if not lst:
+        # If no molecules are available, show a message
+        if not len(essential_methods.ms) > 0:
+            ui.modal_show(
+                ui.modal(
+                    f'Import some SMILES strings to visualize.',
+                    title="No Molecules to Visualize",
+                    easy_close=True,
+                    footer=ui.modal_button("Close")
+                )
+            )
             return None
-        
-        # Generate RDKit Mol objects from SMILES strings
-        essential_methods.mol_from_smiles(lst)
 
         # Generate grid image of molecule structures
-        img = essential_methods.visualize_molecules(lst)
+        img = essential_methods.visualize_molecules()
 
-        # If there is no image, return None
-        if img is None:
-            return None
-        
         # Store image in temporary file and return its path for rendering
         # This is necessary because Shiny expects a file path for image output
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
