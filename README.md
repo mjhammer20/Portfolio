@@ -1,10 +1,7 @@
-# Description
-Personal portfolio including an example application for visualizing molecules from SMILES strings.
+# Portfolio
 
-# Requirements
-Docker
+This repository contains helpful apps, scripts, and modules for scientific computing and serves as a public portfolio for my work.
 
-# Run App
-1. Clone this repository.
-2. From local repo clone, call 'docker compose build' within parent directory to build the container.
-3. From local repo clone, call 'docker compose up' within parent directory to launch app.
+# Contents
+
+- Molecule Viewer : Self contained local Shiny Python application for visualizing molecules from SMILES strings and conducting RDKit operations like substructure searching and similarity calculation.
