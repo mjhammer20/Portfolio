@@ -6,11 +6,36 @@ import tempfile
 # Define UI Layout
 app_ui = ui.page_fluid(
     ui.tags.script("Shiny.setInputValue('page_loaded', True);"),
-    ui.input_text("smiles", "Enter a SMILES string to add to list:"),
-    ui.input_action_button("add_smiles", "Add SMILES"),
-    ui.input_action_button("visualize_molecules", "Visualize Molecules"),
-    ui.output_text("output_smiles_list"),
-    ui.output_image("output_mol_structures"),
+    ui.tags.title("Molecule Viewer"),
+    ui.tags.div(
+        ui.tags.h1(
+            "Molecule Viewer",
+            style="font-size: 36px; margin-bottom: 20px; margin-top: 20px;"),
+        ui.tags.p(
+            "This app allows you to input SMILES strings, visualize molecules, and calculate their similarities."
+            ),
+        ui.tags.p(
+            "Enter a SMILES string to add it to the list and visualize the molecules."
+            ),
+        ui.tags.p(
+            "You can also calculate Tanimoto similarity between the molecules once they are added."
+            ),
+        style="text-align:center; font-size: 12px"
+    ),
+    ui.tags.hr(),
+    ui.tags.div(
+        ui.input_text("smiles", "Enter a SMILES string to add to list:"),
+        ui.input_action_button("add_smiles", "Add SMILES"),
+        ui.tags.br(),
+        ui.output_text("output_smiles_list"),
+        style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
+    ),
+    ui.tags.hr(),
+    ui.tags.div(
+        ui.input_action_button("visualize_molecules", "Visualize Molecules"),
+        ui.output_image("output_mol_structures"),
+        style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
+    ) 
 )
 
 # Define Server Logic
