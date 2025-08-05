@@ -3,22 +3,59 @@ from rdkit_package.essentials import rdkit_essentials
 from shiny import App, ui, render, reactive
 import tempfile
 
-# Initialize RDKit Module
-essential_methods = rdkit_essentials()
-
 # Define UI Layout
 app_ui = ui.page_fluid(
-    ui.input_text("smiles", "Enter a SMILES string to add to list:"),
-    ui.input_action_button("add_smiles", "Add SMILES"),
-    ui.input_action_button("visualize_molecules", "Visualize Molecules"),
-    ui.output_text("output_smiles_list"),
-    ui.output_image("output_mol_structures"),
+    ui.tags.script("Shiny.setInputValue('page_loaded', True);"),
+    ui.tags.title("Molecule Viewer"),
+    ui.tags.div(
+        ui.tags.h1(
+            "Molecule Viewer",
+            style="font-size: 36px; margin-bottom: 20px; margin-top: 20px;"),
+        ui.tags.p(
+            "This app allows you to input SMILES strings, visualize molecules, and calculate their similarities."
+            ),
+        ui.tags.p(
+            "Enter a SMILES string to add it to the list and visualize the molecules."
+            ),
+        ui.tags.p(
+            "You can also calculate Tanimoto similarity between the molecules once they are added."
+            ),
+        style="text-align:center; font-size: 12px"
+    ),
+    ui.tags.hr(),
+    ui.tags.div(
+        ui.input_text("smiles", "Enter a SMILES string to add to list:"),
+        ui.input_action_button("add_smiles", "Add SMILES"),
+        ui.tags.br(),
+        ui.output_text("output_smiles_list"),
+        style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
+    ),
+    ui.tags.hr(),
+    ui.tags.div(
+        ui.input_action_button("visualize_molecules", "Visualize Molecules"),
+        ui.output_image("output_mol_structures"),
+        style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
+    ) 
 )
 
 # Define Server Logic
 def server(input, output, session):  
+    
+    # Initialize RDKit Module
+    essential_methods = rdkit_essentials()
+
     # Initialize a reactive value to store list of SMILES strings
     smiles_list = reactive.Value([])
+
+    @reactive.effect
+    @reactive.event(input.page_loaded)
+    def _():
+
+        # Reset stored values when the page is loaded
+        if input.page_loaded():
+            essential_methods.smiles = []
+            essential_methods.ms = []
+            essential_methods.fps = []
 
     @reactive.effect
     @reactive.event(input.add_smiles)
@@ -26,13 +63,24 @@ def server(input, output, session):
         if input.add_smiles():
             # Fetch smiles string from input
             smiles = input.smiles()
-            
+
             if smiles:
-                # Add the new SMILES to the list
-                updated_list = smiles_list.get() + [smiles]
-                
-                # Update reactive value to ensure output reflects the change
-                smiles_list.set(updated_list)
+                # Validate and import SMILES string using RDKit and update the list
+                try:
+                    essential_methods.import_smiles(smiles)
+                    updated_smiles_list = smiles_list.get() + [smiles]
+                    smiles_list.set(updated_smiles_list)
+
+                # If invalid, show error message
+                except ValueError as e:
+                    ui.modal_show(
+                        ui.modal(
+                            f'Error: {str(e)}',
+                            title="Invalid SMILES",
+                            easy_close=True,
+                            footer=ui.modal_button("Close")
+                        )
+                    )
 
                 # Reset the input field to accept new SMILES
                 session.send_input_message("smiles", {"value": ""})
@@ -56,23 +104,21 @@ def server(input, output, session):
     @reactive.event(input.visualize_molecules)
     def output_mol_structures():
         
-        # Fetch SMILES list stored in reactive value
-        lst = smiles_list.get()
-        
-        # If list is empty, return None
-        if not lst:
+        # If no molecules are available, show a message
+        if not len(essential_methods.ms) > 0:
+            ui.modal_show(
+                ui.modal(
+                    f'Import some SMILES strings to visualize.',
+                    title="No Molecules to Visualize",
+                    easy_close=True,
+                    footer=ui.modal_button("Close")
+                )
+            )
             return None
-        
-        # Generate RDKit Mol objects from SMILES strings
-        essential_methods.mol_from_smiles(lst)
 
         # Generate grid image of molecule structures
-        img = essential_methods.visualize_molecules(lst)
+        img = essential_methods.visualize_molecules()
 
-        # If there is no image, return None
-        if img is None:
-            return None
-        
         # Store image in temporary file and return its path for rendering
         # This is necessary because Shiny expects a file path for image output
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
