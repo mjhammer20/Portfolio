@@ -31,7 +31,7 @@ def server(input, output, session):
 
             if smiles:
                 # Validate and import SMILES string using RDKit
-                try: 
+                try:
                     validated_smiles = essential_methods.import_smiles(smiles)
                     smiles_list.set(validated_smiles)
                 except ValueError as e:

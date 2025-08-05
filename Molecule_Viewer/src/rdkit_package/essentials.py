@@ -15,7 +15,7 @@ class rdkit_essentials():
         self.ms = []
         self.fps = []
 
-    def import_smiles(self, smiles: str) -> list[str]:
+    def import_smiles(self, smiles: str) -> list:
         '''
         Check SMILES for valid format. If valid, add to list and convert to RDKit Mol object.
         If invalid, raise ValueError.
