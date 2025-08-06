@@ -15,33 +15,46 @@ app_ui = ui.page_fluid(
             "This app allows you to input SMILES strings, visualize molecules, and calculate their similarities."
             ),
         ui.tags.p(
-            "Enter a SMILES string to add it to the list and visualize the molecules."
+            "Enter a SMILES string to add it to the list."
             ),
         ui.tags.p(
-            "You can also calculate Tanimoto similarity between the molecules once they are added."
+            "You can visualize and calculate Tanimoto similarity between the molecules once they are added."
             ),
         style="text-align:center; font-size: 12px"
     ),
     ui.tags.hr(),
     ui.navset_card_tab(
-        ui.nav_panel("Import", 
-                      ui.tags.div(
-                        ui.input_text("smiles", "Enter a SMILES string to add to list:"),
-                        ui.input_action_button("add_smiles", "Add SMILES"),
-                        ui.tags.br(),
-                        ui.output_text("output_smiles_list"),
-                        style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
-                        ),
+        ui.nav_panel(
+            "Import",
+            ui.tags.div(
+                ui.input_text("smiles", "Enter a SMILES string to add to list:"),
+                ui.input_action_button("add_smiles", "Add SMILES"),
+                ui.tags.br(),
+                ui.output_text("output_smiles_list"),
+                style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
+                ),
+            ),
+        ui.nav_panel(
+            "Visualize",
+            ui.tags.div(
+                ui.output_image("output_mol_structures"),
+                style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
+                ),
+            ),
+        ui.nav_panel(
+            "Calculate Similarity",
+            ui.tags.div(
+                ui.tags.div(
+                    ui.input_select("cpd1", "Select first molecule:", choices={}),
+                    ui.input_select("cpd2", "Select second molecule:", choices={}),
                     ),
-        ui.nav_panel("Visualize",
-                     ui.tags.div(
-#                        ui.input_action_button("visualize_molecules", "Visualize Molecules"),
-                        ui.output_image("output_mol_structures"),
-                        style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
-                        ),
-                    ),
-        ui.nav_panel("Calculate Similarity", "Functionality coming soon!"),
-        ui.nav_panel("Substructure Search","Functionality coming soon!"),
+                ui.input_action_button('calculate_similarity', 'Calculate Similarity'),
+                ui.tags.br(),
+                ui.output_text("output_similarity"),
+                style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
+                ),
+            ),
+        ui.nav_panel("Substructure Search", "Functionality coming soon!"),
         id="nav_tab"
         ),
     )
@@ -54,6 +67,9 @@ def server(input, output, session):
 
     # Initialize a reactive value to store list of SMILES strings
     smiles_list = reactive.Value([])
+
+    # Initialize a reactive value to store Tanimoto similarity results
+    similarity_result = reactive.Value("")
 
     @reactive.effect
     @reactive.event(input.page_loaded)
@@ -93,6 +109,44 @@ def server(input, output, session):
                 # Reset the input field to accept new SMILES
                 session.send_input_message("smiles", {"value": ""})
 
+    @reactive.effect
+    @reactive.event(input.nav_tab)
+    def _():
+        if input.nav_tab() == "Calculate Similarity":
+            ui.update_select('cpd1', choices={k:v for k, v in enumerate(smiles_list.get())})
+            ui.update_select('cpd2', choices={k:v for k, v in enumerate(smiles_list.get())})
+
+    @reactive.effect
+    @reactive.event(input.calculate_similarity)
+    def _():
+        if input.calculate_similarity():
+            if not input.cpd1() != input.cpd2():
+                ui.modal_show(
+                    ui.modal(
+                        'Please select two different molecules to calculate similarity.',
+                        title="Selection Error",
+                        easy_close=True,
+                        footer=ui.modal_button("Close")
+                    ),
+                )
+            try:
+                essential_methods.generate_fingerprints()
+                similarity = essential_methods.calculate_similarity(
+                    int(input.cpd1()),
+                    int(input.cpd2()),
+                )
+                similarity_result.set(f"Tanimoto Similarity: {similarity:.4f}")
+            except Exception as e:
+                ui.modal_show(
+                    ui.modal(
+                        f'Error calculating similarity: {str(e)}',
+                        title="Calculation Error",
+                        easy_close=True,
+                        footer=ui.modal_button("Close")
+                    ),
+                )
+            
+
     @output
     @render.text
     def output_smiles_list():
@@ -105,7 +159,7 @@ def server(input, output, session):
             return "No SMILES strings added yet." 
         
         # Else, return joined list as string for display
-        return "Current SMILES list: " + ", ".join(lst) 
+        return "Current SMILES list: " + ", ".join(lst)
     
     @output
     @render.image
@@ -142,6 +196,14 @@ def server(input, output, session):
                 "height": img.height,
                 "type": "image/png"
             }
+        
+    @output
+    @render.text
+    def output_similarity():
+        result = similarity_result.get()
+        if result:
+            return result
+
 
 # Lauunch App
 app = App(app_ui, server)
