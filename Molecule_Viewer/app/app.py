@@ -23,20 +23,28 @@ app_ui = ui.page_fluid(
         style="text-align:center; font-size: 12px"
     ),
     ui.tags.hr(),
-    ui.tags.div(
-        ui.input_text("smiles", "Enter a SMILES string to add to list:"),
-        ui.input_action_button("add_smiles", "Add SMILES"),
-        ui.tags.br(),
-        ui.output_text("output_smiles_list"),
-        style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
-    ),
-    ui.tags.hr(),
-    ui.tags.div(
-        ui.input_action_button("visualize_molecules", "Visualize Molecules"),
-        ui.output_image("output_mol_structures"),
-        style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
-    ) 
-)
+    ui.navset_card_tab(
+        ui.nav_panel("Import", 
+                      ui.tags.div(
+                        ui.input_text("smiles", "Enter a SMILES string to add to list:"),
+                        ui.input_action_button("add_smiles", "Add SMILES"),
+                        ui.tags.br(),
+                        ui.output_text("output_smiles_list"),
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
+                        ),
+                    ),
+        ui.nav_panel("Visualize",
+                     ui.tags.div(
+#                        ui.input_action_button("visualize_molecules", "Visualize Molecules"),
+                        ui.output_image("output_mol_structures"),
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
+                        ),
+                    ),
+        ui.nav_panel("Calculate Similarity", "Functionality coming soon!"),
+        ui.nav_panel("Substructure Search","Functionality coming soon!"),
+        id="nav_tab"
+        ),
+    )
 
 # Define Server Logic
 def server(input, output, session):  
@@ -101,8 +109,11 @@ def server(input, output, session):
     
     @output
     @render.image
-    @reactive.event(input.visualize_molecules)
+    @reactive.event(input.nav_tab)
     def output_mol_structures():
+
+        if not input.nav_tab() == "Visualize":
+            return None
         
         # If no molecules are available, show a message
         if not len(essential_methods.ms) > 0:
