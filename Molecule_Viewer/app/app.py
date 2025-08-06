@@ -15,10 +15,10 @@ app_ui = ui.page_fluid(
             "This app allows you to input SMILES strings, visualize molecules, and calculate their similarities."
             ),
         ui.tags.p(
-            "Enter a SMILES string to add it to the list and visualize the molecules."
+            "Enter a SMILES string to add it to the list."
             ),
         ui.tags.p(
-            "You can also calculate Tanimoto similarity between the molecules once they are added."
+            "You can visualize and calculate Tanimoto similarity between the molecules once they are added."
             ),
         style="text-align:center; font-size: 12px"
     ),
