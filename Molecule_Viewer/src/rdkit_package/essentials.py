@@ -42,7 +42,7 @@ class rdkit_essentials():
         fpgen = AllChem.GetRDKitFPGenerator()
         self.fps = [fpgen.GetFingerprint(m) for m in self.ms]
     
-    def calculate_similarity(self, index1, index2):
+    def calculate_similarity(self, index1: int, index2: int):
         '''
         Calculate Tanimoto similarity between two fingerprints.
         
