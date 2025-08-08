@@ -228,6 +228,17 @@ def server(input, output, session):
     @reactive.event(input.search_substructure)
     def output_substructure_search():
 
+        if not len(smiles_list.get()) > 0:
+            ui.modal_show(
+                ui.modal(
+                    'Please import some SMILES strings first.',
+                    title="No Molecules Available",
+                    easy_close=True,
+                    footer=ui.modal_button("Close")
+                )
+            )
+            return None
+
         # Generate substructure search result image
         if not input.mol():
             ui.modal_show(
@@ -238,6 +249,8 @@ def server(input, output, session):
                     footer=ui.modal_button("Close")
                 )
             )
+            return None
+        
         if not input.substructure():
             ui.modal_show(
                 ui.modal(
@@ -247,6 +260,7 @@ def server(input, output, session):
                     footer=ui.modal_button("Close")
                 )
             )
+            return None
 
         try:
             return ui.HTML(essential_methods.substructure_search(int(input.mol()), input.substructure()))
