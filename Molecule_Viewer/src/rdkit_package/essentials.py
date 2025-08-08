@@ -60,22 +60,34 @@ class rdkit_essentials():
         else:
             raise IndexError("Index out of range for fingerprints.")
         
-    def substructure_search(self, index1, index2):
+    def substructure_search(self, index, substructure):
         '''
         Check if one molecule contains a substructure of another.
         
-        :param index1: Index of the first molecule.
+        :param index: Index of the molecule to search for substructure.
         :type index1: int
-        :param index2: Index of the second molecule.
-        :type index2: int
+        :param substructure: SMILES string for substructure to search for.
+        :type substructure: str
         :return: True if the first molecule contains a substructure of the second, False otherwise
         :rtype: bool
 
         '''
-        if index1 < len(self.ms) and index2 < len(self.ms):
-            return self.ms[index1].HasSubstructMatch(self.ms[index2])
-        else:
-            raise IndexError("Index out of range for molecules.")
+    
+        sub_mol = Chem.MolFromSmiles(substructure)
+        if not sub_mol:
+            raise ValueError("Invalid substructure SMILES string provided.")
+        has_substructure = self.ms[index].HasSubstructMatch(sub_mol)
+        if not has_substructure:
+            raise ValueError("Substructure not found in the molecule.")
+        
+        hit_atts = list(self.ms[index].GetSubstructMatch(sub_mol))
+        hit_bonds = []
+        for bond in sub_mol.GetBonds():
+            hit_bonds.append(self.ms[index].GetBondBetweenAtoms(hit_atts[bond.GetBeginAtomIdx()], hit_atts[bond.GetEndAtomIdx()])).GetIdx()
+        img = Draw.rdMolDraw2D.MolDraw2DSVG(400, 200)
+        
+        return Draw.rdMolDraw2D.PrepareAndDrawMolecule(img, self.ms[index], highlightAtoms=hit_atts, highlightBonds=hit_bonds)
+        
         
     def visualize_molecules(self):
         '''
