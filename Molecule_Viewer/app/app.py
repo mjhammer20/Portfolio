@@ -247,7 +247,7 @@ def server(input, output, session):
             )
 
         try:   
-            img = essential_methods.substructure_search(input.mol(), input.substructure())
+            img = essential_methods.substructure_search(int(input.mol()), input.substructure())
 
             # Store image in temporary file and return its path for rendering
             # This is necessary because Shiny expects a file path for image output

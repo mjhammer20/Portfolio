@@ -83,7 +83,8 @@ class rdkit_essentials():
         hit_atts = list(self.ms[index].GetSubstructMatch(sub_mol))
         hit_bonds = []
         for bond in sub_mol.GetBonds():
-            hit_bonds.append(self.ms[index].GetBondBetweenAtoms(hit_atts[bond.GetBeginAtomIdx()], hit_atts[bond.GetEndAtomIdx()])).GetIdx()
+            bond_obj = self.ms[index].GetBondBetweenAtoms(hit_atts[bond.GetBeginAtomIdx()], hit_atts[bond.GetEndAtomIdx()])
+            hit_bonds.append(bond_obj.GetIdx())
         img = Draw.rdMolDraw2D.MolDraw2DSVG(400, 200)
         
         return Draw.rdMolDraw2D.PrepareAndDrawMolecule(img, self.ms[index], highlightAtoms=hit_atts, highlightBonds=hit_bonds)
