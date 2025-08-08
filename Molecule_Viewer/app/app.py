@@ -14,13 +14,13 @@ app_ui = ui.page_fluid(
             "Molecule Viewer",
             style="font-size: 36px; margin-bottom: 20px; margin-top: 20px;"),
         ui.tags.p(
-            "This app allows you to input SMILES strings, visualize molecules, and calculate their similarities."
+            "This app allows you to input SMILES strings to visualize molecules, calculate similarities between loaded molecules, and search substructures within loaded molecules."
             ),
         ui.tags.p(
             "Enter a SMILES string to add it to the list."
             ),
         ui.tags.p(
-            "You can visualize and calculate Tanimoto similarity between the molecules once they are added."
+            "You can visualize molecule, calculate Tanimoto similarity between the molecules, and search substructures within molecules once their SMILES are loaded."
             ),
         style="text-align:center; font-size: 12px"
     ),
@@ -59,13 +59,17 @@ app_ui = ui.page_fluid(
         ui.nav_panel("Substructure Search", 
                     ui.tags.div(    
                         ui.tags.div(
-                            ui.input_select("mol", "Select the molecule you want to search in:", choices={}),
-                            ui.input_text("substructure", "Enter a substructure SMILES string to search for:"),
+                            ui.input_select("mol",
+                                            "Select the molecule you want to search:",
+                                            choices={}),
+                            ui.input_text("substructure",
+                                          "Enter a SMILES string for the substructure to search for:"),
                         ),
-                        ui.input_action_button("search_substructure", "Search Substructure"),
+                        ui.input_action_button("search_substructure",
+                                               "Search Substructure"),
                         ui.tags.br(),
                         ui.output_ui("output_substructure_search"),
-                        style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px"
                     )
                 ),
         id="nav_tab"
