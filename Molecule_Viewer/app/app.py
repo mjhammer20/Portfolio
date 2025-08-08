@@ -1,6 +1,8 @@
 # Import Standard Libraries
 from rdkit_package.essentials import rdkit_essentials
 from shiny import App, ui, render, reactive
+from PIL import Image
+import io
 import tempfile
 
 # Define UI Layout
@@ -62,7 +64,7 @@ app_ui = ui.page_fluid(
                         ),
                         ui.input_action_button("search_substructure", "Search Substructure"),
                         ui.tags.br(),
-                        ui.output_image("output_substructure_search"),
+                        ui.output_ui("output_substructure_search"),
                         style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
                     )
                 ),
@@ -222,7 +224,7 @@ def server(input, output, session):
             return result
         
     @output
-    @render.image
+    @render.ui
     @reactive.event(input.search_substructure)
     def output_substructure_search():
 
@@ -246,21 +248,8 @@ def server(input, output, session):
                 )
             )
 
-        try:   
-            img = essential_methods.substructure_search(int(input.mol()), input.substructure())
-
-            # Store image in temporary file and return its path for rendering
-            # This is necessary because Shiny expects a file path for image output
-            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-                img.save(tmp.name)
-                tmp.flush()
-                return {
-                    "src": tmp.name,
-                    "alt": "Substructure Search Result",
-                    "width": img.width,
-                    "height": img.height,
-                    "type": "image/png"
-                }
+        try:
+            return ui.HTML(essential_methods.substructure_search(int(input.mol()), input.substructure()))
         except ValueError as e:
             ui.modal_show(
                 ui.modal(

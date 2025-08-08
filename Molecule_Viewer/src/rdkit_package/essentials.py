@@ -86,8 +86,10 @@ class rdkit_essentials():
             bond_obj = self.ms[index].GetBondBetweenAtoms(hit_atts[bond.GetBeginAtomIdx()], hit_atts[bond.GetEndAtomIdx()])
             hit_bonds.append(bond_obj.GetIdx())
         img = Draw.rdMolDraw2D.MolDraw2DSVG(400, 200)
+        Draw.rdMolDraw2D.PrepareAndDrawMolecule(img, self.ms[index], highlightAtoms=hit_atts, highlightBonds=hit_bonds)
+        img.FinishDrawing()
         
-        return Draw.rdMolDraw2D.PrepareAndDrawMolecule(img, self.ms[index], highlightAtoms=hit_atts, highlightBonds=hit_bonds)
+        return img.GetDrawingText()
         
         
     def visualize_molecules(self):
