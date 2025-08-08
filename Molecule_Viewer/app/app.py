@@ -54,7 +54,18 @@ app_ui = ui.page_fluid(
                 style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
                 ),
             ),
-        ui.nav_panel("Substructure Search", "Functionality coming soon!"),
+        ui.nav_panel("Substructure Search", 
+                    ui.tags.div(    
+                        ui.tags.div(
+                            ui.input_select("mol", "Select the molecule you want to search in:", choices={}),
+                            ui.input_text("substructure", "Enter a substructure SMILES string to search for:"),
+                        ),
+                        ui.input_action_button("search_substructure", "Search Substructure"),
+                        ui.tags.br(),
+                        ui.output_image("output_substructure_search"),
+                        style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;"
+                    )
+                ),
         id="nav_tab"
         ),
     )
@@ -115,6 +126,12 @@ def server(input, output, session):
         if input.nav_tab() == "Calculate Similarity":
             ui.update_select('cpd1', choices={k:v for k, v in enumerate(smiles_list.get())})
             ui.update_select('cpd2', choices={k:v for k, v in enumerate(smiles_list.get())})
+
+    @reactive.effect
+    @reactive.event(input.nav_tab)
+    def _():
+        if input.nav_tab() == "Substructure Search":
+            ui.update_select('mol', choices={k:v for k, v in enumerate(smiles_list.get())})
 
     @reactive.effect
     @reactive.event(input.calculate_similarity)
@@ -203,7 +220,57 @@ def server(input, output, session):
         result = similarity_result.get()
         if result:
             return result
+        
+    @output
+    @render.image
+    @reactive.event(input.search_substructure)
+    def output_substructure_search():
 
+        # Generate substructure search result image
+        if not input.mol():
+            ui.modal_show(
+                ui.modal(
+                    'Please select a molecule to search.',
+                    title="Input Error",
+                    easy_close=True,
+                    footer=ui.modal_button("Close")
+                )
+            )
+        if not input.substructure():
+            ui.modal_show(
+                ui.modal(
+                    'Please enter a substructure SMILES string to search for.',
+                    title="Input Error",
+                    easy_close=True,
+                    footer=ui.modal_button("Close")
+                )
+            )
+
+        try:   
+            img = essential_methods.substructure_search(input.mol(), input.substructure())
+
+            # Store image in temporary file and return its path for rendering
+            # This is necessary because Shiny expects a file path for image output
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+                img.save(tmp.name)
+                tmp.flush()
+                return {
+                    "src": tmp.name,
+                    "alt": "Substructure Search Result",
+                    "width": img.width,
+                    "height": img.height,
+                    "type": "image/png"
+                }
+        except ValueError as e:
+            ui.modal_show(
+                ui.modal(
+                    f'Error Generating Image: {str(e)}',
+                    title="Substructure Search Error",
+                    easy_close=True,
+                    footer=ui.modal_button("Close")
+                )
+            )
+            return None
 
 # Lauunch App
 app = App(app_ui, server)
