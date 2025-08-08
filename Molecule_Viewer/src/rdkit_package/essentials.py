@@ -68,8 +68,8 @@ class rdkit_essentials():
         :type index1: int
         :param substructure: SMILES string for substructure to search for.
         :type substructure: str
-        :return: True if the first molecule contains a substructure of the second, False otherwise
-        :rtype: bool
+        :return: SVG image str of the molecule with substructure highlighted.
+        :rtype: str
 
         '''
     
