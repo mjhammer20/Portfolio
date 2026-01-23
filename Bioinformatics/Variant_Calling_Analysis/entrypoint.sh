@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eo pipefail
 
 # Try to source conda and activate the 'vca' environment if available
 if [ -f "/opt/conda/etc/profile.d/conda.sh" ]; then
