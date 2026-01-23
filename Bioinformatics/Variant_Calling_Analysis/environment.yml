@@ -4,13 +4,14 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - python=3.10
-  - snakemake-minimal=7.20
+  - python=3.12
+  - snakemake=9.15
   - bwa=0.7.17
-  - samtools=1.15
-  - bcftools=1.15
-  - bedtools=2.30
-  - htslib=1.15
+  - samtools=1.21
+  - bcftools=1.22
+  - bedtools=2.31.1
+  - htslib=1.21
+  - gatk=3.8
   - pysam
   - pandas
   - numpy
