@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+  vca:
+    build: .
+    image: vca_image:latest
+    volumes:
+      - .:/work
+    working_dir: /work
+    tty: true
+    command: bash
